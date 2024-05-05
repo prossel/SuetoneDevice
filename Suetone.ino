@@ -97,14 +97,8 @@ void loop()
   /****************Data Transmitting*************/
   /****************************************/
   if (deviceConnected)
-  { // Transmit data when the Bluetooth is connected.
-    pTxCharacteristic->setValue("Hello this is a long string"); // Send char string
-    pTxCharacteristic->notify();
-    delay(10); // bluetooth stack will go into congestion, if too many packets are sent
-
-    pTxCharacteristic->setValue("DFRobot"); // Send char string
-    pTxCharacteristic->notify();
-    delay(10); // bluetooth stack will go into congestion, if too many packets are sent
+  {
+    sendTestFile(14 * 1024);
   }
   /****************************************/
   /****************************************/
@@ -142,4 +136,55 @@ void BLEBegin()
   pServer->getAdvertising()->start();
 
   Serial.println("Waiting a client connection to notify...");
+}
+
+void sendToBLE(uint8_t *data, int length)
+{
+  pTxCharacteristic->setValue(data, length);
+  pTxCharacteristic->notify();
+  delay(10); // bluetooth stack will go into congestion, if too many packets are sent
+}
+
+void sendToBLE(const String &data)
+{
+  sendToBLE((uint8_t *)data.c_str(), data.length());
+}
+
+void sendTestFile(int dataLength)
+{
+  static unsigned long nextSend = 0;
+  unsigned long ms = millis();
+
+  if (ms >= nextSend)
+  {
+
+    // Use the maximum value given by the stack as an error when using to big of a chunk size
+    int chunkSize = 500;
+
+    // Simulate data
+    uint8_t data[chunkSize];
+    for (int i = 0; i < chunkSize; i++)
+    {
+      data[i] = i % 10 + '0';
+    }
+    data[chunkSize - 1] = '\n';
+
+    // Send file name and size (ex: FILE image.jpg SIZE {dataLength} CHUNK {chunkSize}\n))
+    String message = "{\"file\": \"test.txt\", \"size\": " + String(dataLength) + ", \"chunk\": " + String(chunkSize) + "}";
+    Serial.println(message);
+    sendToBLE(message);
+
+    // Transmit data when the Bluetooth is connected.
+    for (int i = 0; i < dataLength; i += chunkSize)
+    {
+      sendToBLE(&data[0], i < (dataLength - chunkSize) ? chunkSize : dataLength - i);
+    }
+
+    // Send end of transmission signal
+    sendToBLE("END_OF_TRANSMISSION");
+
+    Serial.println("Sent " + String(dataLength) + " bytes in " + String(millis() - ms) + " ms");
+
+    nextSend = millis() + 5000;
+  }
 }
