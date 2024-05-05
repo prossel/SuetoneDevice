@@ -19,9 +19,9 @@ uint8_t txValue = 0;
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
-#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+#define SERVICE_UUID           "6E400001-1A90-46F9-A2C3-46028A276125" // UART service UUID
+#define CHARACTERISTIC_UUID_RX "6E400002-1A90-46F9-A2C3-46028A276125"
+#define CHARACTERISTIC_UUID_TX "6E400003-1a90-46f9-a2c3-46028a276125"
 
 // Bluetooth connect/disconnect. Auto triggered when connection/disconnection event occurs.
 class MyServerCallbacks : public BLEServerCallbacks
