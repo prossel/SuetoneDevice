@@ -9,29 +9,38 @@
 
 bool deviceConnected = false;
 
-void setup()
-{
+void setup() 
+{ 
   Serial.begin(115200);
   BLEBegin(); // Init Bluetooth
-  
+
   setupCamera();
+  setupAccelerometer();
 }
 
-void loop()
-{
-  if (deviceConnected)
-  {
-    static unsigned long nextSend = 0;
-    unsigned long ms = millis();
+void loop() {
+  // static bool cameraInit = false;
+  // if (!cameraInit && millis() > 10000) {
+  //   cameraInit = true;
+  //   setupCamera();
+  //   disableCamera();
+  // }
 
-    if (ms >= nextSend)
-    {
-      //sendTestFile(14 * 1024);
+  static unsigned long nextSend = 0;
+  unsigned long ms = millis();
 
-      capture();
+  if (ms >= nextSend) {
+    //sendTestFile(14 * 1024);
 
-      nextSend = millis() + 5000;
+    if (deviceConnected) {
+      //capture();
     }
+
+    dumpAccelGyro();
+
+    nextSend = millis() + 500;
   }
+
+  delay(10);
 }
 
