@@ -36,7 +36,7 @@ DFRobot_AXP313A axp;
 
 void setupCamera() {
   Serial.setDebugOutput(true);
-  Serial.println("Hello");
+  Serial.println("Setup camera");
   while (axp.begin() != 0) {
     Serial.println("init error");
     delay(1000);
@@ -123,7 +123,15 @@ void setupCamera() {
   s->set_vflip(s, 1);
 #endif
 
-  Serial.print("Camera Ready! ");
+  Serial.println("Camera Ready! ");
+}
+
+void enableCamera() {
+  axp.enableCameraPower(axp.eOV2640);
+}
+
+void disableCamera() {
+  axp.disablePower();
 }
 
 void capture() {
