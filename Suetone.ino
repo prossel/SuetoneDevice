@@ -1,3 +1,4 @@
+
 /*
     Suetone code for Firebeetle 2 ESP32-S3
     
@@ -12,12 +13,25 @@ void setup()
 {
   Serial.begin(115200);
   BLEBegin(); // Init Bluetooth
+  
+  setupCamera();
 }
 
 void loop()
 {
   if (deviceConnected)
   {
-    sendTestFile(14 * 1024);
+    static unsigned long nextSend = 0;
+    unsigned long ms = millis();
+
+    if (ms >= nextSend)
+    {
+      //sendTestFile(14 * 1024);
+
+      capture();
+
+      nextSend = millis() + 5000;
+    }
   }
 }
+
