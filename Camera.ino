@@ -42,6 +42,7 @@ void setupCamera() {
     delay(1000);
   }
   axp.enableCameraPower(axp.eOV2640);  //Enable the power for camera
+
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -134,8 +135,8 @@ void enableCamera() {
 void disableCamera() {
   Serial.println("Disable camera");
   esp_err_t err = esp_camera_deinit();
-  Serial.print("err: ");
-  Serial.println(err == ESP_OK ? "OK" : "FAIL");
+  // Serial.print("err: ");
+  // Serial.println(err == ESP_OK ? "OK" : "FAIL");
   Wire.end();
   //axp.disablePower();
 }
