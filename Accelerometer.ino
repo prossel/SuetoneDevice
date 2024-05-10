@@ -17,9 +17,9 @@
 // specific I2C addresses may be passed as a parameter here
 // AD0 low = 0x68 (default for InvenSense evaluation board)
 // AD0 high = 0x69
-MPU6050 accelgyro;
+//MPU6050 accelgyro;
 // MPU6050 accelgyro(0x69); // <-- use for AD0 high
-//MPU6050 accelgyro(0x68, &Wire1); // <-- use for AD0 low, but 2nd Wire (TWI/I2C) object
+MPU6050 accelgyro(0x68, &Wire1); // <-- use for AD0 low, but 2nd Wire (TWI/I2C) object
 //MPU6050 accelgyro(0x68, &i2cMpu); // <-- use for AD0 low, but 2nd Wire (TWI/I2C) object
 
 int16_t ax, ay, az;
@@ -41,8 +41,8 @@ void setupAccelerometer() {
   Serial.println("Setup accelerometer");
   // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-        Wire.begin(); // already done in camera setup
-        //Wire1.begin(D7, D9, 100000);
+        //Wire.begin(); // already done in camera setup
+        Wire1.begin(D7, D9, 100000);
         //i2cMpu.begin(D7, D9, 100000);
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
@@ -80,6 +80,12 @@ void setupAccelerometer() {
     Serial.print("\n");
     */
 }
+
+void disableAccelerometer() {
+  Serial.println("Disable accelerometer");
+  accelgyro.setSleepEnabled(true);
+  Wire1.end();
+}   
 
 void dumpAccelGyro() {
       // read raw accel/gyro measurements from device

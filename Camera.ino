@@ -69,6 +69,7 @@ void setupCamera() {
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.jpeg_quality = 12;
   config.fb_count = 1;
+  config.sccb_i2c_port = 0;
 
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
@@ -131,7 +132,12 @@ void enableCamera() {
 }
 
 void disableCamera() {
-  axp.disablePower();
+  Serial.println("Disable camera");
+  esp_err_t err = esp_camera_deinit();
+  Serial.print("err: ");
+  Serial.println(err == ESP_OK ? "OK" : "FAIL");
+  Wire.end();
+  //axp.disablePower();
 }
 
 void capture() {
