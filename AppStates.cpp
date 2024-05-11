@@ -7,10 +7,15 @@
 #include "BLE.h"
 #include "Camera.h"
 
+// Pin to read battery voltage. There is a votage divisor by 1.33 so 4.2V will be 3.15V
+#define BATTERY_PIN A3
+float batteryVoltage = 0;
+
+
 #include <Adafruit_NeoPixel.h>
 
-#define NUM_PIXELS  24
-#define STRIP_PIN   D2
+#define NUM_PIXELS 24
+#define STRIP_PIN D2
 
 Adafruit_NeoPixel strip(NUM_PIXELS, STRIP_PIN, NEO_GRB + NEO_KHZ800);
 // Argument 1 = Number of pixels in NeoPixel strip
@@ -66,6 +71,48 @@ void checkSerial()
   }
 }
 
+// Read battery voltage on A3
+void readBatteryVoltage()
+{
+  pinMode(BATTERY_PIN, INPUT);
+  uint16_t val = analogRead(BATTERY_PIN);
+  // Serial.print("Battery raw value: ");
+  // Serial.println(val);
+
+  batteryVoltage = val*3.3 / 4095 * 1.33;
+
+  // // Every 10 sec send on serial 
+  // static unsigned long lastSend = -1;
+  // unsigned long ms = millis();
+  // if (ms - lastSend > 10000)
+  // {
+  //   lastSend = ms;
+  //   Serial.print("Battery voltage: ");
+  //   Serial.println(batteryVoltage);
+  // } 
+
+}
+
+// Led strip breath effect
+void breathStrip(float period, unsigned long start, int red = 255, int green = 255, int blue = 255)
+{
+  static unsigned long lastUpdate = 0;
+  static float brightness = 0;
+
+  unsigned long ms = millis();
+  if (ms - lastUpdate > period / 100)
+  {
+    lastUpdate = ms;
+    brightness = 128 + 127 * cos(2 * PI * (ms - start) / period - PI);
+
+    for (int i = 0; i < strip.numPixels(); i++)
+    {
+      strip.setPixelColor(i, strip.Color(red * brightness / 255, green * brightness / 255, blue * brightness / 255));
+    }
+    strip.show();
+  }
+}
+
 // ************************************************************
 //                           STATE INIT
 // ************************************************************
@@ -88,6 +135,9 @@ void StateInit::enter()
 
 State *StateInit::loop()
 {
+  // Breath effect
+  breathStrip(6000, stateEnterMs, 0, 255, 0);
+
   unsigned long ms = millis();
 
   // reset timer when motion is detected. If no motion is detected for 5 seconds, save the orientation and to to picture state
@@ -189,6 +239,8 @@ State *StateIdle::loop()
     return new StatePulse();
   }
 
+  //readBatteryVoltage();
+
   return NULL;
 }
 
@@ -213,21 +265,8 @@ void StatePulse::enter()
 
 State *StatePulse::loop()
 {
-  // Every second, turn the next LED on or off on the strip
-  static unsigned long lastUpdate = 0;
-  if (millis() - lastUpdate > 1000)
-  {
-    lastUpdate = millis();
-    static int led = 0;
-    strip.clear();
-    strip.setPixelColor(led, strip.Color(255, 255, 255));
-    strip.show();
-    led++;
-    if (led >= strip.numPixels())
-    {
-      led = 0;
-    }
-  }
+  // Breath effect
+  breathStrip(6000, stateEnterMs);
 
   // if still during 1 s go to picture state
   motion.update();
