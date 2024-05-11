@@ -9,9 +9,10 @@
 
 #include <Adafruit_NeoPixel.h>
 
-const int stripPin = D2;
+#define NUM_PIXELS  24
+#define STRIP_PIN   D2
 
-Adafruit_NeoPixel strip(12, stripPin, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip(NUM_PIXELS, STRIP_PIN, NEO_GRB + NEO_KHZ800);
 // Argument 1 = Number of pixels in NeoPixel strip
 // Argument 2 = Arduino pin number (most are valid)
 // Argument 3 = Pixel type flags, add together as needed:
@@ -82,7 +83,7 @@ void StateInit::enter()
   // enable the camera, and then disable the camera and re-enable the accelerometer when we leave that state.
   setupAccelerometer();
 
-  motion.start(150);
+  motion.start(200);
 }
 
 State *StateInit::loop()
@@ -137,6 +138,8 @@ State *StatePicture::loop()
     strip.setPixelColor(i, strip.Color(255, 255, 255)); // RGB value for white
   }
   strip.show();
+
+  delay(200);
 
   // take a picture
   capture();
@@ -205,7 +208,7 @@ void StatePulse::enter()
   strip.clear();
   strip.show();
 
-  motion.start();
+  motion.start(200);
 }
 
 State *StatePulse::loop()
