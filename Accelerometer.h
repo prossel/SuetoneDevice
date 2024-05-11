@@ -1,3 +1,4 @@
+#include "HWCDC.h"
 // Based on example at https://github.com/ElectronicCats/mpu6050/blob/master/examples/MPU6050_raw/MPU6050_raw.ino
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
@@ -115,3 +116,89 @@ void dumpAccelGyro() {
         Serial.write((uint8_t)(gz >> 8)); Serial.write((uint8_t)(gz & 0xFF));
     #endif
 }
+
+class MotionDetector {
+    
+    // last acceleration vector
+    int16_t axLast, ayLast, azLast = 0;
+
+    // motion low pass filtered
+    float fMotion = 0;
+
+    // threshold for motion detection
+    float fThreshold = 1;
+
+    // last motion detection millis
+    unsigned long lastMotionMs = 0;
+
+    public:
+
+    static bool debug;
+
+    void start(float threshold = 150) {
+
+        // reset last motion time
+        lastMotionMs = 0;
+
+        // set threshold
+        fThreshold = threshold;
+
+        // init last acceleration vector
+        accelgyro.getAcceleration(&axLast, &ayLast, &azLast);
+    }
+
+    void update() {
+        // read raw accel/gyro measurements from device
+        accelgyro.getAcceleration(&ax, &ay, &az);
+
+        // calculate motion
+        float fNewMotion = (float)sqrt(((float)ax - (float)axLast) * ((float)ax - (float)axLast) + ((float)ay - (float)ayLast) * ((float)ay - (float)ayLast) + ((float)az - (float)azLast) * ((float)az - (float)azLast));
+
+        // low pass filter
+        fMotion = 0.95f * fMotion + 0.05f * fNewMotion;
+
+        // update last acceleration vector
+        axLast = ax;
+        ayLast = ay;
+        azLast = az;
+
+        // Serial.print("NewMotion:");
+        // Serial.print(fNewMotion);
+        // Serial.print('\t');
+        
+        // Dump motion every 200 ms
+        static unsigned long lastDumpMs = 0;
+        if (debug && millis() > lastDumpMs + 200) {
+            lastDumpMs = millis();
+
+            Serial.print("Motion:");
+            Serial.print(fMotion);
+            Serial.print('\t');
+            Serial.println();
+        }
+
+        // detect motion
+        if (fMotion > fThreshold) {
+            lastMotionMs = millis();
+            if (debug) {
+              Serial.print("Motion detected: ");
+              Serial.print(fMotion);
+              Serial.println();
+            }
+        }
+    }
+
+    float getMotion() {
+        return fMotion;
+    }
+
+    float getLastMotionMs() {
+        return lastMotionMs;
+    }
+    
+    float motionDetected() {
+        return lastMotionMs != 0;
+    }
+};
+
+bool MotionDetector::debug = false;
