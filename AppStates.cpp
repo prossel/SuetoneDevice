@@ -185,7 +185,7 @@ State *StatePicture::loop()
   // Turn ON all leds white full power
   for (int i = 0; i < strip.numPixels(); i++)
   {
-    strip.setPixelColor(i, strip.Color(127, 127, 127)); // RGB value for white
+    strip.setPixelColor(i, strip.Color(60, 60, 60)); // RGB value for white
   }
   strip.show();
 
